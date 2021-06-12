@@ -1,0 +1,303 @@
+[
+    {
+        "id": "905fd59.d90e728",
+        "type": "tab",
+        "label": "共通",
+        "disabled": false,
+        "info": "MQTTブローカーなど共通の道具"
+    },
+    {
+        "id": "f64214bf.107ca8",
+        "type": "aedes broker",
+        "z": "905fd59.d90e728",
+        "name": "MQTTブローカー",
+        "mqtt_port": 1883,
+        "mqtt_ws_bind": "port",
+        "mqtt_ws_port": "",
+        "mqtt_ws_path": "",
+        "cert": "",
+        "key": "",
+        "certname": "",
+        "keyname": "",
+        "dburl": "",
+        "usetls": false,
+        "x": 160,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "de0acd68.af9f7",
+        "type": "comment",
+        "z": "905fd59.d90e728",
+        "name": "MQTTブローカーを起動(これにより動作やデプロイに時間がかかる)",
+        "info": "",
+        "x": 320,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "c5436b1f.0160d8",
+        "type": "tab",
+        "label": "ラジオ体操",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "66d020a7.ac193",
+        "type": "chromecast-play",
+        "z": "c5436b1f.0160d8",
+        "name": "ラジオ体操動画の再生",
+        "url": "http://192.168.11.21:1880/getVideo/radioexercise.mp4",
+        "contentType": "video/mp4",
+        "ip": "192.168.11.28",
+        "x": 420,
+        "y": 140,
+        "wires": [
+            [
+                "a418e784.d2b838"
+            ]
+        ],
+        "info": "# This Node does...\n\n動画をGoogle Nest Hubで再生します。\nIPの宛先に対して、Media URLにある動画を流してね、という指示を出します。\n\n# Media URL\n\n動画の宛先です。Youtubeなどを直接指定することはできません。\nGoogle Nest HubからHTTPリクエストで動画を見に行く形になるので、\nHTTPリクエストが来たら動画ファイルを返すという仕組みを別途設けています。\n続きはHTTP inノードを参照のこと\n\n# IP\n\nGoogle Nest HubのIPアドレスです。\n"
+    },
+    {
+        "id": "b6da2f3f.d7aff",
+        "type": "inject",
+        "z": "c5436b1f.0160d8",
+        "name": "平日14:58に実施",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "58 14 * * 1,2,3,4,5",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 140,
+        "wires": [
+            [
+                "66d020a7.ac193"
+            ]
+        ]
+    },
+    {
+        "id": "a418e784.d2b838",
+        "type": "debug",
+        "z": "c5436b1f.0160d8",
+        "name": "GoogleHome結果",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "a5aadfb.831a22",
+        "type": "http in",
+        "z": "c5436b1f.0160d8",
+        "name": "[GET]/getVideo/radioexercise.mp4",
+        "url": "/getVideo/radioexercise.mp4",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 176,
+        "y": 340,
+        "wires": [
+            [
+                "aa1d3831.c8d418"
+            ]
+        ],
+        "info": "# This Node does...\n\nHTTPリクエストのエンドポイントを作ります。\nURLはNode-REDのURLに続く形になります。\n\nNode-REDがhttp://192.168.1.5:1880　\nURLが/abc\nこの場合、リクエスト先は\nhttp://192.168.1.5:1880/abc\nとなります。ポート番号は80や8080などではないので注意です。\n\n# URL\n\nエンドポイントのURLです。\n/から入力します。\n末尾がファイル名である必要はありません。\n\n"
+    },
+    {
+        "id": "aa1d3831.c8d418",
+        "type": "file in",
+        "z": "c5436b1f.0160d8",
+        "name": "ラジオ体操映像ファイル",
+        "filename": "/home/pi/Share/radioexercise.mp4",
+        "format": "",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "x": 446,
+        "y": 340,
+        "wires": [
+            [
+                "4f7a297e.fd6c48"
+            ]
+        ],
+        "info": "# This Node does...\n\n動画ファイルをバイナリで返します。\n\n# ファイル名\n\n動画ファイルへのフルパスです。\n\n\n# 出力形式\n\n「バイナリバッファ」です。\n"
+    },
+    {
+        "id": "4f7a297e.fd6c48",
+        "type": "http response",
+        "z": "c5436b1f.0160d8",
+        "name": "[200]映像ファイルをバイナリでレスポンスする",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "video/mp4",
+            "Content-Disposition": "inline",
+            "Accept-Ranges": "bytes"
+        },
+        "x": 776,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "4304225c.878d7c",
+        "type": "mqtt in",
+        "z": "c5436b1f.0160d8",
+        "name": "[Sub]radioexercise",
+        "topic": "radioexercise",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "8ab54d0b.15cb3",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "x": 150,
+        "y": 40,
+        "wires": [
+            [
+                "59cbeae9.178ab4",
+                "66d020a7.ac193"
+            ]
+        ]
+    },
+    {
+        "id": "59cbeae9.178ab4",
+        "type": "debug",
+        "z": "c5436b1f.0160d8",
+        "name": "radioexercise",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 370,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "505c039c.73b53c",
+        "type": "mqtt out",
+        "z": "c5436b1f.0160d8",
+        "name": "[Pub]radioexercise",
+        "topic": "radioexercise",
+        "qos": "0",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "8ab54d0b.15cb3",
+        "x": 437,
+        "y": 517,
+        "wires": []
+    },
+    {
+        "id": "d831422a.fba5",
+        "type": "inject",
+        "z": "c5436b1f.0160d8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 147,
+        "y": 517,
+        "wires": [
+            [
+                "505c039c.73b53c"
+            ]
+        ]
+    },
+    {
+        "id": "4f44cd27.3a0434",
+        "type": "comment",
+        "z": "c5436b1f.0160d8",
+        "name": "MQTT動作確認用",
+        "info": "",
+        "x": 120,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "5a7e52c7.8c2d4c",
+        "type": "comment",
+        "z": "c5436b1f.0160d8",
+        "name": "要ファイル指定",
+        "info": "",
+        "x": 420,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "94689058.87a6b",
+        "type": "comment",
+        "z": "c5436b1f.0160d8",
+        "name": "要URL,IP指定(Media Url, IP)",
+        "info": "",
+        "x": 440,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "8ab54d0b.15cb3",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "radioexercise",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "aaa",
+        "birthQos": "0",
+        "birthRetain": "true",
+        "birthPayload": "hello",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    }
+]
